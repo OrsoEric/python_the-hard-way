@@ -76,7 +76,7 @@ print( "ask a value. yield return but return state", next(my_generator_instance)
 import time
 
 #range to check
-max = 20_000_000
+max = 2_000_000
 
 start = time.time()
 u1_res = any([x % 17 == 0 for x in range(max)])
@@ -87,4 +87,3 @@ start = time.time()
 u1_res = any(x % 17 == 0 for x in range(max))
 stop = time.time()
 print("if a generator is used and checked, it stops early: ", stop-start, 's', u1_res )
-
