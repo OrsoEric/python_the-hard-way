@@ -21,9 +21,9 @@ def measure_repeat( min : int, max : int, length : int ) -> int:
         #check if adding the number causes a repeat
         index = is_repeat( my_sequence, length )
         if index >= 0:
-            print(f'length: {len(my_sequence)}')
-            print(f'index: {index}')
-            print(f'sequence: {my_sequence}')
+            logging.info(f'length: {len(my_sequence)}')
+            logging.info(f'index: {index}')
+            logging.info(f'sequence: {my_sequence}')
             return len(my_sequence)
         else:
             pass
@@ -84,7 +84,7 @@ def main():
     #print(is_repeat( [5, 7, 3, 5, 7] , 2 ))
 
     #execute
-    sequence_length = measure_repeat( 0, 100, 2 )
+    sequence_length = measure_repeat( 0, 100, 3 )
     print('', sequence_length)
 
     stop = lib_time.time()
