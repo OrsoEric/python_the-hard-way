@@ -1,3 +1,6 @@
+#NOTE: done with convert to string and str.find is much faster due to better builtin find
+
+#python modules
 import logging
 import time as lib_time
 import random as lib_random
@@ -54,7 +57,7 @@ def is_repeat( source_sequence : list(), sequence_length : int ) -> int:
     if (index >= 0):
         logging.info(f'found sequence: {mask}')
         logging.debug(f'in sequence: {seek}')
-        logging.debug(f'at index: {index}' )
+        logging.debug(f'at index: {index}')
         return index    
 
     return -1
@@ -84,7 +87,7 @@ def main():
     #print(is_repeat( [5, 7, 3, 5, 7] , 2 ))
 
     #execute
-    sequence_length = measure_repeat( 0, 100, 3 )
+    sequence_length = measure_repeat( 0, 100, 2 )
     print('', sequence_length)
 
     stop = lib_time.time()
