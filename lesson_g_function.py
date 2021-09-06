@@ -107,8 +107,24 @@ my_string = 'shaka'
 print( "show string: ", my_string )
 print( "show with repr: ", repr(my_string) )
 
+#-------------------------------------------------------
+#define some parameter as positional, cannot be specified with name
 
+def my_mixed_function(my_pos_arg, my_pos_arg_b, /, my_arg_c, my_arg_d=22):
 
+    return None
 
+my_mixed_function(1, 2, my_arg_d = 3, my_arg_c = 5)
 
+#-------------------------------------------------------
+# star operator is used to glue together data unside tuple
+
+def my_star_function( my_arg, *my_star_args ):
+    """ this function has a fixed parameter and any numbers of varidac parameters inside a tuple
+    """ 
+    print(f"arg: {my_arg}, star args: {my_star_args}")
+
+    return None
+
+my_star_function( 8, 'shaka', 119.0, 14)
 
