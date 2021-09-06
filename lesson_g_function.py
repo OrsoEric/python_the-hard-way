@@ -128,3 +128,21 @@ def my_star_function( my_arg, *my_star_args ):
 
 my_star_function( 8, 'shaka', 119.0, 14)
 
+#-------------------------------------------------------
+#star star operator turns arguments in a dictionary
+#it can be used for wrapper that needs not to be rewritten when the underlying function is updated
+
+def function(a, b, shaka, red ):
+    return None
+
+def wrapper_inverter(*args, invert=False, **kwargs):
+    if not invert:
+        return function(*args, **kwargs)
+    else:
+        return -function(*args, **kwargs)
+
+print( wrapper_inverter(20, 17, shaka = 42, red = 'Green') )
+
+#-------------------------------------------------------
+# lambda functions
+

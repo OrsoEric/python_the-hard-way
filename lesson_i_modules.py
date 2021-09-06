@@ -48,10 +48,22 @@ print( 'check if a letter is ascii: ', 'è' in lib_string.ascii_letters )
 
 #-------------------------------------------------------------------
 # sys
-
+import os
 import sys as lib_sys
-
+import warnings
+#used to specify where take .py modules
 print(lib_sys.copyright)
+
+print(lib_sys.path.append(os.getcwd()))
+
+#detect when asserts are enabled
+if lib_sys.flags.optimize == 0:
+    warnings.warn("Warning, all asserts are enabled", stacklevel=1)
+
+#-------------------------------------------------------------------
+
+
+os.path.join(os.getcwd(), 'dir1', 'dir2', 'foo.txt')
 
 #terminate program with status 1
 #lib_sys.exit(1)
@@ -113,5 +125,89 @@ print(f'\nreturn random int between {start} and {stop}: ', lib_random.randint(st
 lib_random.setstate(save_state)
 print(f'\nreturn random int between {start} and {stop}: ', lib_random.randint(start, stop) )
 #-------------------------------------------------------------------
+ 
 
+ #import pprint
+
+ #shaka = {'three': [2,5,4], 'mot':'hugmong'}
+ #pprint(shaka)
+
+
+#-------------------------------------------------------------------
+# collections
+# default dict has something to do with doing things faster
+
+from collections import defaultdict, Counter
+import random
+
+numbers = [random.randint(0, 9) for _ in range(100_000)]
+
+def a(numbers):
+    count = dict()
+    for n in numbers:
+        if n not in count:
+            count[n] = 1
+        else:
+            count[n] += 1
+    return count
+
+count = a(numbers)
+{n: count[n] for n in sorted(count)}
+
+def b(numbers):
+    count = defaultdict(int)
+    for n in numbers:
+        count[n] += 1
+
+count = b(numbers)
+#{n: count[n] for n in sorted(count)}
+
+
+count = Counter(numbers)
+{n: count[n] for n in sorted(count)}
+
+
+
+# Python program to demonstrate
+# dictionary
+ 
+ 
+Dict = {1: 'Geeks', 2: 'For', 3: 'Geeks'}
+print("Dictionary:")
+print(Dict)
+print(Dict[1])
+ 
+# Uncommenting this print(Dict[4])
+# will raise a KeyError as the
+# 4 is not present in the dictionary
+
+#-------------------------------------------------------------------
+# 
+from collections import ChainMap
+
+#i have two dictionaries
+d1 = {'a': 1, 'b': 2} 
+d2 = {'c': 3, 'd': 4, 'e': 19} 
+d3 = {'e': 5, 'f': 6} 
+    
+# Defining the chainmap  
+c = ChainMap(d1, d2, d3)  
+
+print('I have all the maps together', c, c['e'])
+
+#-------------------------------------------------------------------
+# namedtuple it's like a struct. i can access with index or names, i have a fixed number of named fields
+
+from collections import namedtuple
+
+# Declaring namedtuple()  
+Student = namedtuple('Student',['name','age','DOB'])
+# Construct 
+my_named_tuple = Student('Nandini','19','2541997')
+# Access using index  
+print(f"The Student age using index is : {my_named_tuple[1]}")
+#access using keyname
+print(f"The Student age using keyname is : {my_named_tuple.age}")
+
+#-------------------------------------------------------------------
 

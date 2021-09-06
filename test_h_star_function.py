@@ -33,6 +33,11 @@ def main():
     print(scrubbed ) 
     scrubbed = minmax_scrubber(10, 20, 9, 13, 99, 17, 20, 10, equal_major=False , equal_minor=False) 
     print(scrubbed ) 
+
+    #i can use star operator to unpack lists as individual values
+    scrubbed = minmax_scrubber( 10, 20, *range(1, 100) ) 
+    print(scrubbed ) 
+
     return None
 
 #if the file is being read WITH the intent of being executed
