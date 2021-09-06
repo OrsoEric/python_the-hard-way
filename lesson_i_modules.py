@@ -210,4 +210,17 @@ print(f"The Student age using index is : {my_named_tuple[1]}")
 print(f"The Student age using keyname is : {my_named_tuple.age}")
 
 #-------------------------------------------------------------------
+# bynary de/serialization of object
+#   used to create dump files
+#   can be used to load a preprocessed structure and speed up loading
+
+import pickle
+#dump as binary and safely close the file
+pickle.dump( my_named_tuple, open( 'pickle.log','wb'))
+#reload dump
+my_named_tuple = pickle.load(open( 'pickle.log','rb'))
+print(my_named_tuple)
+
+#-------------------------------------------------------------------
+
 

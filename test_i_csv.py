@@ -79,7 +79,3 @@ print(median_list)
 
 quality_score_median = statistics.median(median_list)
 print(quality_score_median)
-
-
-
-
