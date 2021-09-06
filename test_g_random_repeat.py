@@ -81,9 +81,9 @@ def search_repeat_string( source_string : str(), repeat_length : int ) -> int:
     """
     logging.debug(f'string: "{source_string}" | len: {repeat_length}')
     #i need to construct the mask string by finding a number of separator from the end
-    while True:
+    #while True:
         
-        source_string[:-].rfind(':')
+        #source_string[:-].rfind(':')
 
     #i need to match the string to the mask
 

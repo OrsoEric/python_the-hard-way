@@ -32,6 +32,8 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action='count', default=0, help='increase log verbosity')
     #argument with parameter
     parser.add_argument('-s', '--shaka', nargs=1, help='When the walls fell')
+    #???
+    parser.add_argument('args', nargs='+', metavar='data_file', help='data files')
 
     #ask parser to parse the arguments
     args = parser.parse_args()
