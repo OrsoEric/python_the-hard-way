@@ -6,14 +6,19 @@ import logging
 # 10, 20, 9, 13, 99 -> 13
 def minmax_scrubber( min : int, max : int, /, *args) -> list():
     scrubbed_values = list()
-    for value in args:
-        if (min <= value <= max):
-            scrubbed_values.append(value)
+    #with loop
+    #for value in args:
+        #if (min <= value <= max):
+            #scrubbed_values.append(value)
+
+    #with list comprehension
+    scrubbed_values = [value for value in args if min <= value <= max]
+        
     return scrubbed_values
 
 ##
 def main():
-    scrubbed = minmax_scrubber(10, 20, 9, 13, 99) 
+    scrubbed = minmax_scrubber(10, 20, 9, 13, 99, 17) 
     print(scrubbed ) 
     return None
 
