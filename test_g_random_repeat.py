@@ -2,6 +2,7 @@
 
 #python modules
 from itertools import product
+import calendar
 import logging
 import time as lib_time
 import random as lib_random
@@ -82,7 +83,7 @@ def measure_performance( min_rand, max_rand, max_sequence_length, num_seeds ):
         my_sequence = list()
             #ROLL A SEED
         #roll a new seed from epoch
-        my_seed = lib_time.gmtime(0)
+        my_seed = calendar.timegm(lib_time.gmtime())
         print(my_seed)
         #check if seed has changed, otherwise increment previous seed
         if (my_seed == old_seed):
@@ -116,8 +117,6 @@ def main():
 
     measure_performance(1, 90, 3, 2)
     
-
-
     #print(f'elapsed time: {- start}')
     pass
 
