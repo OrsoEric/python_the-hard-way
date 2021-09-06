@@ -1,11 +1,15 @@
 import logging
 
-## get min, max than a sequence of numbers. returns all numbers between min and max
+## 
 # min
 # max
-# 10, 20, 9, 13, 99 -> 13
 def minmax_scrubber( min : int, max : int, /, *args) -> list():
+    """get min, max than a sequence of numbers. returns all numbers between min and max
+    example: minmax_scrubber(10, 20, 9, 13, 99) -> [13]
+    """
+    #initialize list
     scrubbed_values = list()
+
     #with loop
     #for value in args:
         #if (min <= value <= max):
@@ -14,6 +18,7 @@ def minmax_scrubber( min : int, max : int, /, *args) -> list():
     #with list comprehension
     scrubbed_values = [value for value in args if min <= value <= max]
         
+    #return scrubbed list
     return scrubbed_values
 
 ##
