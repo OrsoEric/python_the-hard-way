@@ -16,6 +16,15 @@ def test_for():
         print(f'{item}|', end='')
     print('')
 
+    
+    my_sequence = list()
+    str_a = "shaka"
+    str_b = "piazza"
+    for a, b in zip(str_a, str_b):
+        my_sequence += [(a, b)]
+    print(f"zip() scans two iterables but ends when the shortest end: {my_sequence}")
+    
+
     return
 
 

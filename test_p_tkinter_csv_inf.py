@@ -1,5 +1,6 @@
 ## combine a INI configuration file and a CSV module to read a .csv file
 #using spaces/tab as separator is dumb. changed editor settings to force tab
+#add message box for missing fields in the INI file
 
 #for computation of path
 import os
@@ -13,6 +14,9 @@ import csv
 import statistics
 #convert iso format date
 import datetime
+#to show error windows
+import tkinter as tk
+from tkinter import messagebox
 
 ##  Globals
 CONFIG_FILE = 'test_k_config.ini'
@@ -54,11 +58,13 @@ def load_config_file( filename_config : str(), ini_sections, ini_keys : list() )
         #failed to find key inside section
         else:
             logging.error(f"attribute >{ini_keys}< doesn't exist...")
+            messagebox.showerror("Missing Key", f"INI key {ini_keys} required")
             return -1
 
     #failed to find section
     else:
         logging.error(f"section >{ini_sections}< doesn't exist...")
+        messagebox.showerror("Missing Section", f"INI section {ini_sections} required")
         return -1
 
     return my_ini
@@ -234,10 +240,15 @@ def main():
 
 #if the file is being read WITH the intent of being executed
 if __name__ == '__main__':
+    #initialize logging
     logging.basicConfig(
         #level of debug to show
         level=logging.DEBUG,
         #header of the debug message
         format='[%(asctime)s] %(levelname)s: %(message)s',
     )
+    #retire root window
+    root = tk.Tk()
+    root.withdraw()
+    #execute
     main()
