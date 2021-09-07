@@ -21,6 +21,7 @@ def load_config_file( filename_config : str() ) -> int:
             my_ini.read_file(my_opened_ini)
     except OSError as problem:
         logging.error(f'problem: {problem}')
+        return -1
 
     logging.debug(f'see the sections of the INI: {my_ini.sections()}')
     target_section = "path"
