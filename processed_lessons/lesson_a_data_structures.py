@@ -65,13 +65,18 @@ def test_tuple():
 
     return
 
-##  List
+##  String
 #   immutable, homogeneus
 def test_string():
     print("-------------------------------")
     print("\tstr()")
 
     print(f'str() are immutable, homogeneus: {"shaka"}')
+
+    #the single apex allow to remove escape sequence on double apex
+    str_a = "hi \"Doc\"!"
+    str_b = 'hi "Doc"!'
+    print(f"strings are defined with either single and double apex: <{str_a}> <{str_b}> ")
 
     return
 

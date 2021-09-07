@@ -13,7 +13,11 @@ CONFIG_FILE = 'test_j_config.ini'
 
 ## Load the configuration file
 #
-def load_config_file( filename_config : str() ) -> int:
+def load_config_file( filename_config : str(), ini_sections, ini_keys : list() ):
+    """load configuration file
+    checks that a list of sections and a list of keys are contained inside the INI
+    return the INI file
+    """
     #construct path
     my_ini_filename = os.path.join(os.getcwd(), filename_config)
     #construct config parser
@@ -31,39 +35,46 @@ def load_config_file( filename_config : str() ) -> int:
         return -1
 
     #search a given section inside the INI (inside square brackets [section])
-    target_section = "path"
     logging.debug(f'see the sections of the INI: {my_ini.sections()}')
-    if (target_section in my_ini.sections()):
+    if ini_sections in my_ini.sections():
         #search a given key inside the section
-        #target_key = "dest_file"
-        target_keys = list(["dest_file" , "csv_file"])
         #fetch attributes inside the section and pu them inside an iterable list
-        target_section_attributes = list(my_ini[target_section])
-        logging.debug(f"section {target_section} exist! and contain: {target_section_attributes}")
+        target_section_attributes = list(my_ini[ini_sections])
+        logging.debug(f"section {ini_sections} exist! and contain: {target_section_attributes}")
         #search if keys exist
-        if all(key in target_section_attributes for key in target_keys):
+        if all(key in target_section_attributes for key in ini_keys):
             #show the key and value
-            logging.debug(f"attribute >{target_keys}< exist and is equal to: {my_ini.items(target_section, target_keys)}")
+            logging.debug(f"attribute >{ini_keys}< exist and is equal to: {my_ini.items(ini_sections, ini_keys)}")
         #failed to find key inside section
         else:
-            logging.error(f"attribute >{target_keys}< doesn't exist...")
+            logging.error(f"attribute >{ini_keys}< doesn't exist...")
             return -1
 
     #failed to find section
     else:
-        logging.error(f"section >{target_section}< doesn't exist...")
+        logging.error(f"section >{ini_sections}< doesn't exist...")
         return -1
 
     return 0
+
+
+##
+def awesome_ini_loader( filename_config : str(), ini_sections : list(), ini_keys : list() ):
+    """
+    """
+
+
+    return
+
 
 ##
 #
 def main():
     #load the INI file
-    ret = load_config_file( CONFIG_FILE )
-    if (ret < 0):
-        logging.error(f'could not load INI file {CONFIG_FILE}...')
-        return -1
+    ret = load_config_file( CONFIG_FILE,"path" ,["dest_file" , "csv_file"] )
+    #if (ret < 0):
+        #logging.error(f'could not load INI file {CONFIG_FILE}...')
+        #return -1
 
     return 0
 
