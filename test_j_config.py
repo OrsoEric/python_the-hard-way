@@ -15,27 +15,33 @@ def load_config_file( filename_config : str() ) -> int:
     my_ini_filename = os.path.join(os.getcwd(), filename_config)
     #construct config parser
     my_ini = configparser.ConfigParser()
-
+    #try to load the configuration file    
     try:
         with open(my_ini_filename) as my_opened_ini:
+            #use the configparser to parse the INI
             my_ini.read_file(my_opened_ini)
+    #failed to open file
     except OSError as problem:
         logging.error(f'problem: {problem}')
         return -1
-
-    logging.debug(f'see the sections of the INI: {my_ini.sections()}')
+    #search a given section inside the INI (inside square brackets [section])
     target_section = "path"
+    logging.debug(f'see the sections of the INI: {my_ini.sections()}')
     if (target_section in my_ini.sections()):
-        #fetch attributes inside the section
+        #search a given key inside the section
+        target_key = "dest_file"
+        #fetch attributes inside the section and pu them inside an iterable list
         target_section_attribures = list(my_ini[target_section])
         logging.debug(f"section {target_section} exist! and contain: {target_section_attribures}")
-        target_attribute = "dest_file"
-        if target_attribute in target_section_attribures:
-            logging.debug(f"attribute >{target_attribute}< exist and is equal to: {my_ini.items(target_section, target_attribute)}")
+        #search if key exist
+        if target_key in target_section_attribures:
+            #show the key and value
+            logging.debug(f"attribute >{target_key}< exist and is equal to: {my_ini.items(target_section, target_key)}")
+        #failed to find key inside section
         else:
-            logging.error(f"attribute >{target_attribute}< doesn't exist...")
+            logging.error(f"attribute >{target_key}< doesn't exist...")
             return -1
-
+    #failed to find section
     else:
         logging.error(f"section >{target_section}< doesn't exist...")
         return -1
@@ -46,7 +52,7 @@ def load_config_file( filename_config : str() ) -> int:
 ##
 #
 def main():
-
+    #load the INI file
     ret = load_config_file( CONFIG_FILE )
     if (ret < 0):
         logging.error(f'could not load INI file {CONFIG_FILE}...')
