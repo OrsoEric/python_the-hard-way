@@ -55,8 +55,15 @@ def test_list():
 
     return
 
-##
+##  Tuple
+#   immutable, heterogeneus
+def test_tuple():
+    print("-------------------------------")
+    print("\ttuple()")
+    my_tuple = tuple( (1, 'shaka', -3.33) )
+    print(f"tuple are immutable, heterogeneus: {my_tuple}")
 
+    return
 
 ##  List
 #   immutable, homogeneus
@@ -73,4 +80,5 @@ def test_string():
 ##Execute tests
 test_bytearray()
 test_list()
+test_tuple()
 test_string()
