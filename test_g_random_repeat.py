@@ -108,7 +108,7 @@ def measure_repeat_string( min : int, max : int, length : int ) -> float:
 
         my_string += f':{temp}'
         #check if adding the number causes a repeat
-        index = search_repeat_string( my_string, temp, length )
+        index = search_repeat_string( my_string, length )
         #if a repeat has been found
         if index >= 0:
             #measure time elapsed
