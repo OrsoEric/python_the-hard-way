@@ -43,10 +43,41 @@ def test_series():
 # it's a set of ordered columns    
 def test_data_frames():
     #initialize from a dictionary
-    my_data_frame = pd.DataFrame( {"name" : ["Hugh", "Biggus", "Mike" ], "surname": ["Mongous", "Diccus", "Hunt"]})
-    print(f" {my_data_frame}")
+    my_data_frame = pd.DataFrame( {"name" : ["Hugh", "Biggus", "Mike" ], "surname": ["Mongous", "Diccus", "Hunt"], "Key":[42, 666, 0]})
+    print(f"Data Frame:\n{my_data_frame}")
+    print(f"dot operator with field name extract a series:\n{my_data_frame.name}")
+    
+    #dictionaries of dictionaries
+    population_dictionary_of_dictionary = { "Italy" : {2000 : 60e6, 2010: 65e6, 2020: 70e6, 2030: 517}, "Sealand" : { 2000 : 5, 2005: 5, 2015: 5, 2020: 5, 2029: 7} }
+    my_data_frame = pd.DataFrame( population_dictionary_of_dictionary )
+    print(f"from dictionaries of dictionaries. shared keys, missing NaN:\n{my_data_frame}")
+    my_data_frame.Index = "Population history"
+    print(f"Data Frame Index:\n{my_data_frame.index}")
+
+    #care not usign weird keys
+    #poison_data_frame = { "index" : [40, 50], "finger": [8]}
+    #poison_data_frame.Index = "hand"
+    #print(f"Data Frame Index:\n{poison_data_frame.index} {poison_data_frame}")
+
+#print(f"{}")
+def test_df_loc():
+    data_frame_pop = pd.DataFrame({ "Italy" : {2000 : 60e6, 2010: 65e6, 2020: 70e6, 2030: 517}, "Sealand" : { 2000 : 5, 2005: 5, 2015: 5, 2020: 5, 2029: 7} })
+    print(f"Data Frame:\n{data_frame_pop}")
+    print(f"loc allow to use square brackets like numpy: {data_frame_pop.loc[2000]}")
+    print(f"loc allow construction of a numpy subset array: {  data_frame_pop.loc[[2000, 2015], ['Italy']] }")
+
+
+def test_drop():
+    data_frame_pop = pd.DataFrame({ "Italy" : {2000 : 60e6, 2010: 65e6, 2020: 70e6, 2030: 517}, "Sealand" : { 2000 : 5, 2005: 5, 2015: 5, 2020: 5, 2029: 7} })
+    print(f"Data Frame:\n{data_frame_pop}")
+    data_fram_drop = data_frame_pop.drop[2020]
+    print(f"drop does an hard copy by default: {data_frame_pop}")    
 
 
 
 #test_series()
-test_data_frames()
+#test_data_frames()
+#test_df_loc()
+#test_drop()
+
+

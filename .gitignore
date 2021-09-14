@@ -142,3 +142,4 @@ dmypy.json
 
 # Private files
 -*
+confidential_datasets/
