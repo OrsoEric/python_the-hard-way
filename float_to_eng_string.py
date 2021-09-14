@@ -6,7 +6,10 @@ import logging
 #   
 def float_to_eng_string(source : float, significant_digits : int= 4  ) -> str() :
      
-    #sign correction
+    #----------------------------------------------------
+    #   sign correction
+    #----------------------------------------------------
+
     if (source >= 0.0):
         value = source
         output_str = "+"
@@ -14,6 +17,10 @@ def float_to_eng_string(source : float, significant_digits : int= 4  ) -> str() 
         value = -source
         output_str = "-"
     logging.debug(f'source: {source} | value: {value} | output string: {output_str}')
+
+    #----------------------------------------------------
+    #   exponent detection and normalization
+    #----------------------------------------------------
 
     #make sure number is between 1.0 and 1000.0
     exp_index = 0
@@ -47,54 +54,29 @@ def float_to_eng_string(source : float, significant_digits : int= 4  ) -> str() 
 
         #sweet spot
         else:
-            if (value >= 100.0):
-                #initialize base
-                base = 100.0
-                #if would cause rounding problems
-                if (value >= 1000.0 -(5*1000.0)/(10**significant_digits)):
-                    value += (5*100.0)/(10**significant_digits)
-                    logging.debug(f'rounding... | value: {value} | exponent: {exp_index} | base: {base} | digits: {significant_digits}')
-                    pass
+            x_done = False
+            #n_margin = (50)/(10**significant_digits)
+            #logging.debug(f"margin: {n_margin}")
+            #scan the three possible bases after normalization
+            for base in [100.0, 10.0, 1.0]:
+                #if the value is within the scan limit
+                if (value >= base):
+                        x_done = True
+                        logging.debug(f"normalization complete | value: {value} | base: {base}")
+                        break
+                #if the value is below scan limit
                 else:
-                    #sweet spot
-                    logging.debug(f'sweet spot! | value: {value} | exponent: {exp_index} | base: {base}')
-                    break
-
-                
-            elif (value >= 10.0):
-                #initialize base
-                base = 10.0
-                #if would cause rounding problems
-                if (value >= 10.0 -(5*10.0)/(10**significant_digits)):
-                    value += (5*10.0)/(10**significant_digits)
-                    logging.debug(f'rounding... | value: {value} | exponent: {exp_index} | base: {base} | digits: {significant_digits}')
+                    #scan a smaller base
                     pass
-                else:
-                    #sweet spot
-                    logging.debug(f'sweet spot! | value: {value} | exponent: {exp_index} | base: {base}')
-                    break
-
+            #the renormalization is complete
+            if x_done == True:
+                #done renormalizing
                 break
-            elif (value >= 1.0):
-                #initialize base
-                base = 1.0
-
-                #if would cause rounding problems
-                if (value >= 1.0 -(5*1.0)/(10**significant_digits)):
-                    value += (5*1.0)/(10**significant_digits)
-                    logging.debug(f'rounding... | value: {value} | exponent: {exp_index} | base: {base} | digits: {significant_digits}')
-                    pass
-                else:
-                    #sweet spot
-                    logging.debug(f'sweet spot! | value: {value} | exponent: {exp_index} | base: {base}')
-                    break
-
-                logging.debug(f'sweet spot! | value: {value} | exponent: {exp_index} | base: {base}')
-                break
-            else:
-                pass
-        
     
+    #----------------------------------------------------
+    #   digit computation and decimal separator
+    #----------------------------------------------------
+
     #for digit_index in range( 0, significant_digits ):
     digit_index = 0
     while True:
@@ -116,10 +98,15 @@ def float_to_eng_string(source : float, significant_digits : int= 4  ) -> str() 
                 logging.debug(f'digit computed | value: {value} | base: {base} | digit: {digit_int} | index: {digit_index}')
 
             #add the digit to the string
+            if ((digit_int < 0) or (digit_int > 9)):
+                #re-execute by rounding now that I know that I must round
+                value = source +(10**(3*exp_index))*(50)/(10**significant_digits)
+                logging.debug(f'rounding detected! | {exp_index} {(10**(3*exp_index))*(50)/(10**significant_digits)} | value: {source} ->  base: {value}')
+                return float_to_eng_string(value, significant_digits  )
+
             output_str += f"{digit_int}"
             digit_index += 1
             #if value is reduced below unity, i need to place a point
-            #if (value < 10.0 +(5.0)/(10**significant_digits)) and (value > 1.0 -(0.5)/(10**significant_digits)):
             if (base == 1.0):
                 output_str += "."
                 logging.debug(f'add decimal separator | value {value} | up: {10.0 +(5.0)/(10**significant_digits)} | down: {1.0 -(0.5)/(10**significant_digits)} | string {output_str}')
@@ -158,9 +145,12 @@ def float_to_eng_string(source : float, significant_digits : int= 4  ) -> str() 
 
         assert not (value < 0.0), f"negative! {value}"    
 
+    #----------------------------------------------------
+    #   SI sign and return
+    #----------------------------------------------------
+
     #now append the S.I. modifier
     si_suffix = "afpnum KMGTPE"
     output_str += si_suffix[6 +exp_index]
     logging.debug(f'result: {output_str}')
     return output_str
-
