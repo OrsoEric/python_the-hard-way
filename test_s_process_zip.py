@@ -13,12 +13,16 @@ import string
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdate
+#for log color view
+from matplotlib.colors import LogNorm
+from pandas.core.frame import DataFrame
 
 #should do progress bars?
 import tqdm
 
 CONFIDENTIAL_DATA_FOLDER = 'confidential_datasets'
 CONFIDENTIAL_DATA_FILE = '210521_36000_45_4Nm_txt.zip'
+#CONFIDENTIAL_DATA_FILE = '36000_45_4Nm_txt.zip'
 
 ##  Try to open a file
 def try_to_open( file_name : str() ) -> bool:
@@ -86,28 +90,13 @@ def fetch_data_frame_from_zip():
     data = pd.concat(list_of_data_frames)
     return data
 
-##  Process a file inside a zip
-#
-def exercise1_zip():
-    #fetch data and push them inside the DataFrame
-    data = fetch_data_frame_from_zip()
-    logging.info(data.describe())
-    #process the data
-    process_data(data)
-    logging.info(data.describe())
-    #plot the data
-    #data.plot()
-    #only plot first and last columns
-    sub_data = data[[data.columns[0], data.columns[1], data.columns[-2], data.columns[-1]]]
+def show_data( data : pd.DataFrame() ):
     my_figure, my_axis = plt.subplots(figsize=(16,9)) 
-
-    #the data represent different components
-    sub_component_a = list(data.columns[0:30])
-    sub_component_b = list(data.columns[30:])
-
+        
     #show grid and larger image, use an aux scale for some
     #sub_data.plot(ax =my_axis,  figsize=(16,9),grid=True, secondary_y =[ data.columns[-2],data.columns[-1]])
-    data.plot(ax =my_axis,  figsize=(16,9),grid=True, secondary_y =sub_component_b)
+    #data.plot(ax =my_axis,  figsize=(16,9),grid=True, secondary_y =sub_component_b)
+    data.plot(ax =my_axis,  figsize=(16,9),grid=True)
         #since X axis was a datetime there are objects that do formatting
     #set vertical line each day
     my_axis.xaxis.set_major_locator(mdate.DayLocator())
@@ -123,14 +112,58 @@ def exercise1_zip():
     plt.show()
     
 
+##  Process a file inside a zip
+#
+def exercise1_zip():
+    #fetch data and push them inside the DataFrame
+    data = fetch_data_frame_from_zip()
+    logging.info(data.describe())
+    #process the data
+    process_data(data)
+    logging.info(data.describe())
+    #plot the data
+    #data.plot()
+    #only plot first and last columns
+    sub_data = data[[data.columns[0], data.columns[1], data.columns[-2], data.columns[-1]]]
+    show_data(data)
+    #I need two sets of brackets or it doesn't generate a data frame in output?
+    #post_process_column(data[[data.columns[0]]])
+    
+import seaborn as sns
+
+##  Process a file inside a zip
+#
+def exercise2_correlation():
+    #fetch data and push them inside the DataFrame
+    data = fetch_data_frame_from_zip()
+    #the data represent different components
+    sub_component_a = list(data.columns[0:30])
+    sub_component_b = list(data.columns[30:])
+    data[data.columns[0]] += 10*np.random.random((data.shape[0],))
+    
+    for column_name in sub_component_b:
+        del(data[column_name])
+    logging.info(data.describe())
+    #process the data
+    process_data(data)
+    logging.info(data.describe())
+    #plot the data
+    data.plot()
+    #only plot first and last columns
+    sub_data = data[[data.columns[0], data.columns[1], data.columns[-2], data.columns[-1]]]
+    show_data(data)
+    #find matrix of correlation
+    logging.info(f"correlation:\n{data.corr()}")
+
+    sns.heatmap(data.corr(), norm=LogNorm())
+    plt.show()
 
 ##
 #
 def process_data( source : pd.DataFrame() ):
-
     #i need to sort indexes by time to make sure time interpolation to work
     source.sort_index(inplace=True)
-
+    #
     RANGE = 5.0
     source_mean = source.mean()
     source_mean_min = min(source_mean)
@@ -145,12 +178,30 @@ def process_data( source : pd.DataFrame() ):
 
     return
 
+##
+def post_process_column( source : pd.DataFrame() ):
+    logging.info(f"postprocess source:\n{source}")
+    #add a column which is the difference of
+    column_name = source.columns[0]
+    logging.info(source.describe())
+    #compute difference
+    source["shaka"] = np.abs( source[column_name] -source[column_name].shift() )
+    
+    #scrub derivatives that are too high
+    MAX_DIFF = 2.5
+    source.loc[(source["shaka"] > MAX_DIFF), column_name] = np.nan
+    #delet aid column
+    del(source["shaka"])
+    logging.info(f"postprocess source:\n{source}")
+    return
+
+##
 def main():
-    exercise1_zip()
+    exercise2_correlation()
     
     pass
 
-#if the file is being read WITH the intent of being executed
+## if the file is being read WITH the intent of being executed
 if __name__ == '__main__':
     logging.basicConfig(
         #level of debug to show
