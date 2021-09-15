@@ -52,6 +52,8 @@ def test_list():
     #list can be concatenated
     my_concatenated_list = my_list +['con', 'cat', 'enated']
     print(f"list can be concatenated with '+' {my_concatenated_list}")
+    #length of a list
+    print(f"length of a list: {len(my_concatenated_list)}")
 
     return
 
