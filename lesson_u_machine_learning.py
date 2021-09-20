@@ -83,6 +83,7 @@
 ##  sklearn like an inefficient lego for machine learning, good to try thing
 #C:\Program Files (x86)\Python\Scripts>
 #pip3 install sklearn
+from pandas.core.frame import DataFrame
 from float_to_eng_string import float_to_eng_string
 from time import perf_counter
 
@@ -106,6 +107,7 @@ print(f'took {float_to_eng_string(perf_counter() -timestamp)}s to import sklearn
 import pandas as pd
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 import os
 
@@ -115,10 +117,14 @@ import logging
 #
 def open_csv():
     CONFIDENTIAL_DATA_FOLDER = 'confidential_datasets'
-    CONFIDENTIAL_DATA_FILE = 'tset_H10_slip_noslip.csv'
+    #CONFIDENTIAL_DATA_FILE = 'tset_H10_slip_noslip.csv'
+    CONFIDENTIAL_DATA_FILE = '2021_05_21_tset_new_ref_H10_2.csv'
+    
 
     file_name = os.path.join(os.getcwd(), CONFIDENTIAL_DATA_FOLDER, CONFIDENTIAL_DATA_FILE)
-    my_csv = pd.read_csv(file_name, header=None, sep=',')
+    #this csv has an header, i should let the class parse it
+    #my_csv = pd.read_csv(file_name, header=None, sep=',')
+    my_csv = pd.read_csv(file_name, sep=',')
     return my_csv
 
 ##Preprocess the datafrae
@@ -126,25 +132,69 @@ def extract_matrix( source_csv ):
     
     #exclude first row
     #exclude the last two columns
-    xxx=source_csv.iloc[1:,:-2].values.astype(float)
+    data_matrix=source_csv.iloc[1:,:-2].values.astype(float)
     #print(f"my_csv{xxx}")
-    return xxx
+    return data_matrix
 
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
+## Principal component analysis
+def apply_pca( source_matrix ):
+
+    #my_pca =  PCA(n_components=2)
+    #my_pca.fit(source_matrix)
+    #my_pca.transform(source_matrix)
+
+    #Can be done in one line
+    my_pca =PCA(n_components=2).fit_transform(source_matrix)
+    #Normalize 0 1 all dimensions
+    my_pca = MinMaxScaler().fit_transform(my_pca)
+
+    print(f"data{my_pca}, {type(my_pca)}, {my_pca.size}, {my_pca.shape}")
+    return my_pca
+
+from sklearn.pipeline import make_pipeline
+##  apply the tool as a pipeline
+def pipelinizer( source_matrix ):
+    #construct pipeline
+    my_pipeline = make_pipeline( PCA(n_components=2), MinMaxScaler() )
+    #try different scaler
+    #my_pipeline = make_pipeline( PCA(n_components=2), StandardScaler() )
+    #prescalind data changes the result
+    #my_pipeline = make_pipeline( StandardScaler(), PCA(n_components=2), StandardScaler() )
+
+    #from the outside it makes the fit->transform calls of all components
+    my_result = my_pipeline.fit_transform(source_matrix)
+    return my_result
 
 ##
 def main():
     #exercise2_correlation()
     my_csv = open_csv()
     #logging.info(f"my_csv{my_csv}")
-    #print(my_csv)
+    print(my_csv)
 
     my_matrix = extract_matrix(my_csv)
     print(f"data{my_matrix}, {type(my_matrix)}, {my_matrix.size}, {my_matrix.shape}")
-    data_pca = PCA(n_components=2).fit_transform(my_matrix)
-    #data_pca.plot()
-    print(f"data{data_pca}, {type(data_pca)}, {data_pca.size}, {data_pca.shape}")
-    plt.plot(data_pca)
+    
+    #PCA is doing a linear combination of the source and is pouring out just two dimensions
+    #data_pca = apply_pca(my_matrix)
+    
+    #process with 
+    data_pca = pipelinizer(my_matrix)
+    
+    #plt.scatter(x=data_pca[:,0], y=data_pca[:,1])
+    #plt.show()
+
+    dataframe_pca = DataFrame(data_pca, columns=['PCA0','PCA1'])
+    #dataframe_pca = DataFrame(data_pca, columns=[f"PCA{index for index in range(data_pca.shape[1])}"])
+    #take from original csv the name column
+    dataframe_pca['type'] = my_csv.iloc[:,161]
+    #print using seaborn, using name as hue
+    sns.scatterplot(data=dataframe_pca, x='PCA0', y='PCA1', hue='type')
     plt.show()
+
+    print(dataframe_pca[dataframe_pca.Cluster ==1])
 
     pass
 
