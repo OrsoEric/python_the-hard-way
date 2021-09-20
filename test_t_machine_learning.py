@@ -69,10 +69,8 @@ def unpack_accelerations( source_data_frame, frequency ):
     my_row = source_data_frame.loc[index].transpose()
     print(my_row)
 
-    return
-    
-
-
+    return new_acceleration
+     
 def main():
 
     my_acceleration_data = fetch_data_frame(CONFIDENTIAL_DATA_FOLDER, CONFIDENTIAL_DATA_FILE)
@@ -86,6 +84,8 @@ def main():
     #my_acceleration_data["timestamp"].plot.h  .index.plo
 
     list_of_accelerations = unpack_accelerations( my_acceleration_data, SAMPLING_FREQUENCY )
+    list_of_accelerations.plot()
+    plt.show()
 
     pass
 
