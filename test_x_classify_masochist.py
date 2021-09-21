@@ -1,4 +1,6 @@
-## classify using LogisticRegression
+## use PCA to remove the most useful columns
+
+from pandas import DataFrame
 from pandas import read_csv
 import time
 import logging as logging
@@ -21,13 +23,26 @@ def open_csv():
     return my_csv
 
 
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+
 ##
 def extract_matrix( source_csv ):
+
+    PCA_AXES = 10
+    PCA_DISCCARD = 2
+
+    source_matrix = source_csv.iloc[:,:-2]
+
+    my_pca =PCA(n_components=PCA_AXES).fit_transform(source_matrix)
+    my_pca = MinMaxScaler().fit_transform(my_pca)
+    my_masochist_pca = my_pca[:,PCA_DISCCARD:]
+    logging.info(f"PCA: {my_pca.shape} {my_masochist_pca.shape}")
     #extract features inside a matrix
-    X = source_csv.iloc[:,:-2].to_numpy()
-    
+    X = my_masochist_pca
+
     #extract classes
     my_encoder = LabelEncoder().fit( source_csv.Name )
     y = my_encoder.transform( source_csv.Name )
@@ -64,6 +79,21 @@ def show_confusion( y_train, y_pred_train, y_test, y_pred_test ):
     my_fig_test = sns.heatmap(my_confusion_matrix_test, annot=True, fmt="d")
     
 
+def show( X_train, X_test, y_train, y_pred_train, y_test, y_pred_test  ):
+
+    #construct DataFrame
+    my_dataframe = DataFrame()
+
+    my_dataframe["PCA0"] = X_train[:, 0]
+    
+
+    #my_fig = plt.figure("SCATTERPLOT", figsize=(10,6))
+    #my_fig = sns.scatterplot(data=subset_dataframe, x='PCA0', y='PCA1', hue='Cluster',marker="+")
+    print(X_train)
+    print(y_pred_train)
+
+    return
+
 def main():
     #open the CSV file
     my_csv = open_csv()
@@ -82,6 +112,7 @@ def main():
     #----------------------------------------------------
 
     show_confusion( y_train, y_pred_train, y_test, y_pred_test )
+    show(X_train, X_test, y_train, y_pred_train, y_test, y_pred_test)
     plt.show()
 
     return
