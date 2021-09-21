@@ -43,102 +43,23 @@ def my_loader( x_show = False ):
     return my_dataframe
 
 #----------------------------------------------------
-# PCA
+# Extract matrix
 #----------------------------------------------------
-
-"""
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import MinMaxScaler
 #
-def compute_pca( source_matrix, num_components = 2, x_show = False  ):
-    
-    my_pca =PCA(n_components=num_components).fit_transform(source_matrix)
-    my_pca = MinMaxScaler().fit_transform(my_pca)
 
-    logging.info(f"{my_pca}")
-    if x_show == True:
-        #my_fig_train_a = plt.figure("PCA", figsize=(10,6))
-        #my_fig_train_a = sns.scatterplot(data=my_pca, x=my_dataframe.columns[0], y=my_dataframe.columns[1], hue="class")
-        pass
-
-    return my_pca
-"""
-
-#----------------------------------------------------
-# Extract data
-#----------------------------------------------------
-
-from sklearn.model_selection import train_test_split
 ##
 def extract_matrix( source_dataframe ):
     logging.info(f"Dataframe: {source_dataframe}")
     X = source_dataframe.iloc[:,:-1]
     y = source_dataframe["class"]
-    #divide in training and validation
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size = 0.8 )
-    logging.info(f"training: {X_train.shape} {y_train.shape}")
-    logging.info(f"validation: {X_test.shape} {y_test.shape}")
 
-    return X_train, X_test, y_train, y_test
-
-#----------------------------------------------------
-# Logistic Classifier
-#----------------------------------------------------
-
-from sklearn.linear_model import LogisticRegression
-##
-def exe_classifier( X_train, X_test, y_train, y_test ):
-    my_classifier = LogisticRegression( max_iter=10e3 )
-    my_classifier.fit( X_train, y_train )
-    y_predict_train = my_classifier.predict( X_train )
-
-    y_predict_test = my_classifier.predict( X_test )
-
-    return y_predict_train, y_predict_test
-
-#----------------------------------------------------
-#   With random forest
-#----------------------------------------------------
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
-##
-def exe_classifier_forest( X_train, X_test, y_train, y_test ):
-
-    my_pipeline = make_pipeline( StandardScaler(), RandomForestClassifier(n_estimators=20) )
-    my_pipeline.fit( X_train, y_train )
-    y_predict_train = my_pipeline.predict( X_train )
-
-    y_predict_test = my_pipeline.predict( X_test )
-
-    return y_predict_train, y_predict_test
-
-#----------------------------------------------------
-#   With random forest and grid search
-#----------------------------------------------------
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-##
-def exe_classifier_forest_search( X_train, X_test, y_train, y_test ):
-    #dictionary with the parameters to explore
-    PARAMS = { "n_estimators" : [20, 40] }
-    #build a pipeline. uses best model.score equivalent to accuracy
-    my_pipeline = make_pipeline( StandardScaler(), GridSearchCV( RandomForestClassifier(), PARAMS) )
-    my_pipeline.fit( X_train, y_train )
-    y_predict_train = my_pipeline.predict( X_train )
-
-    y_predict_test = my_pipeline.predict( X_test )
-
-    return y_predict_train, y_predict_test
+    return X, y
 
 #----------------------------------------------------
 #   Support Vector Machine
 #----------------------------------------------------
 
+from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 ##
 # TODO: discover how to make grid search work
@@ -155,9 +76,12 @@ def exe_classifier_svc( X_train, X_test, y_train, y_test ):
     y_predict_train = my_pipeline.predict( X_train )
     #make prediction on validation data
     y_predict_test = my_pipeline.predict( X_test )
+
+    result_score = my_pipeline.steps[-1][1].best_score
+
     #return predictions
-    return y_predict_train, y_predict_test
-    
+    return y_predict_train, y_predict_test, result_score
+
 #----------------------------------------------------
 #   Assembly the data into good and bad sets
 #----------------------------------------------------
@@ -245,6 +169,9 @@ def show( i_df_source_good : DataFrame(), i_df_source_bad : DataFrame() ):
 # MAIN
 #----------------------------------------------------
 
+
+from sklearn.model_selection import KFold
+
 def main():
 
     #load the data
@@ -255,13 +182,24 @@ def main():
     #compute_pca( my_dataframe, x_show=True)
 
     #separate training and validation
-    X_train, X_test, y_train, y_test = extract_matrix(my_dataframe)
+    X, y = extract_matrix(my_dataframe)
 
-    #y_pred_train, y_pred_test = exe_classifier( X_train, X_test, y_train, y_test )
-    #y_pred_train, y_pred_test = exe_classifier_forest( X_train, X_test, y_train, y_test )
-    #y_pred_train, y_pred_test = exe_classifier_forest_search( X_train, X_test, y_train, y_test )
-    y_pred_train, y_pred_test = exe_classifier_svc( X_train, X_test, y_train, y_test )
     
+
+    X_mat = X.to_numpy
+    print(f"MAT {X_mat}")
+
+    my_kfold = KFold(n_splits=5)
+    for i_train, i_test in my_kfold.split(X_mat):
+        X_train = X_mat[i_train]
+        X_test = X_mat[i_test]
+        y_train, y_test = y[i_train], y[i_test]
+        logging.info(f"training: {X_train.shape} {y_train.shape}")
+        logging.info(f"validation: {X_test.shape} {y_test.shape}")
+
+        y_pred_train, y_pred_test, score = exe_classifier_svc( X_train, X_test, y_train, y_test )
+
+
 
     #find good and bad predictions
     dataframe_good, dataframe_bad = split_good_bad( X_train, y_train, y_pred_train, X_test, y_test, y_pred_test )
