@@ -1,4 +1,5 @@
 ## Dummy dataset iris flower classification
+#BROKEN
 
 #----------------------------------------------------
 # IMPORT
@@ -77,10 +78,10 @@ def exe_classifier_svc( X_train, X_test, y_train, y_test ):
     #make prediction on validation data
     y_predict_test = my_pipeline.predict( X_test )
 
-    result_score = my_pipeline.steps[-1][1].best_score
+    #result_score = my_pipeline.steps[-1][1].best_score
 
     #return predictions
-    return y_predict_train, y_predict_test, result_score
+    return y_predict_train, y_predict_test
 
 #----------------------------------------------------
 #   Assembly the data into good and bad sets
@@ -169,37 +170,29 @@ def show( i_df_source_good : DataFrame(), i_df_source_bad : DataFrame() ):
 # MAIN
 #----------------------------------------------------
 
-
 from sklearn.model_selection import KFold
-
+##
 def main():
 
     #load the data
     my_dataframe = my_loader(False)
     plt.show()
 
-    #apply PCA
-    #compute_pca( my_dataframe, x_show=True)
-
     #separate training and validation
     X, y = extract_matrix(my_dataframe)
-
-    
-
+    #
     X_mat = X.to_numpy()
-    print(f"MAT {X_mat} shape {X_mat.shape}")
-
-    my_kfold = KFold(n_splits=5)
+    print(f"MAT shape {X_mat.shape}")
+    #
+    my_kfold = KFold(n_splits=5, shuffle=True)
     for i_train, i_test in my_kfold.split(X_mat):
-        X_train = X_mat[i_train]
-        X_test = X_mat[i_test]
+        X_train = X.iloc[i_train]
+        X_test = X.iloc[i_test]
         y_train, y_test = y[i_train], y[i_test]
         logging.info(f"training: {X_train.shape} {y_train.shape}")
         logging.info(f"validation: {X_test.shape} {y_test.shape}")
 
-        y_pred_train, y_pred_test, score = exe_classifier_svc( X_train, X_test, y_train, y_test )
-
-
+        y_pred_train, y_pred_test = exe_classifier_svc( X_train, X_test, y_train, y_test )
 
     #find good and bad predictions
     dataframe_good, dataframe_bad = split_good_bad( X_train, y_train, y_pred_train, X_test, y_test, y_pred_test )

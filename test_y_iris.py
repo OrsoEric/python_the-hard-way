@@ -139,6 +139,7 @@ def exe_classifier_forest_search( X_train, X_test, y_train, y_test ):
 #   Support Vector Machine
 #----------------------------------------------------
 
+from sklearn.metrics import plot_roc_curve
 from sklearn import svm
 ##
 # TODO: discover how to make grid search work
@@ -155,6 +156,9 @@ def exe_classifier_svc( X_train, X_test, y_train, y_test ):
     y_predict_train = my_pipeline.predict( X_train )
     #make prediction on validation data
     y_predict_test = my_pipeline.predict( X_test )
+    logging.info(f"Model parameters: {my_pipeline.get_params()}")
+    #my_fig_roc = plt.figure("TRAIN", figsize=(10,6))
+    #my_fig_roc = plot_roc_curve( my_pipeline, X_test, X_test )
     #return predictions
     return y_predict_train, y_predict_test
     
