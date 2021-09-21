@@ -79,6 +79,8 @@
 #   train -> try to remove a dimension -> performace degraded a lot? yes was useful, no, keep it out
 #   care, maybe a smarter model would have used the feature and achieved higher performance
 
+##
+#   sklearn.cluster.FeatureAgglomeration
 
 ##  sklearn like an inefficient lego for machine learning, good to try thing
 #C:\Program Files (x86)\Python\Scripts>

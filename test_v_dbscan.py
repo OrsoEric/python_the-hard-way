@@ -15,9 +15,9 @@ import seaborn as sns
 def open_csv():
     CONFIDENTIAL_DATA_FOLDER = 'confidential_datasets'
     #two clusters
-    CONFIDENTIAL_DATA_FILE = 'tset_H10_slip_noslip.csv'
+    #CONFIDENTIAL_DATA_FILE = 'tset_H10_slip_noslip.csv'
     #five clusters 
-    #CONFIDENTIAL_DATA_FILE = '2021_05_21_tset_new_ref_H10_2.csv'
+    CONFIDENTIAL_DATA_FILE = '2021_05_21_tset_new_ref_H10_2.csv'
     
     file_name = os.path.join(os.getcwd(), CONFIDENTIAL_DATA_FOLDER, CONFIDENTIAL_DATA_FILE)
     my_csv = read_csv(file_name, sep=',')
@@ -65,6 +65,10 @@ def main():
     my_csv = open_csv()
     #logging.debug(f"{my_csv}")
     
+    #----------------------------------------------------
+    # Search for clusters and outliers
+    #----------------------------------------------------
+
     data_matrix = extract_matrix(my_csv)
 
     ##
@@ -78,27 +82,69 @@ def main():
     logging.debug(f"--------------------------------------\DBSCAN: {data_cluster} {data_cluster.shape}")
     #add to dataframe
     my_dataframe["Cluster"] = data_cluster
-    #compute the index of outliers
-    my_dataframe["label"]=""
-    my_dataframe.loc[my_dataframe.Cluster==-1,"label"] = [f"{index}" for index in my_dataframe[my_dataframe.Cluster < 0].index  ]
+    
+    #----------------------------------------------------
+    # Show
+    #----------------------------------------------------
 
     #initialize plot
-    my_figure, my_axes_a = plt.subplots(figsize=(10,6))
+    fig_a = plt.figure("set", figsize=(10,6))
+    
     #my_axes_b = my_axes_a.twinx()
-
+    plt.figure(1)
     #show all data
-    my_axes_a = sns.scatterplot(data=my_dataframe, x='PCA0', y='PCA1', hue='Cluster',marker="+")
+    fig_a = sns.scatterplot(data=my_dataframe, x='PCA0', y='PCA1', hue='Cluster',marker="+")
 
     #construct a dataframe with the outliers
     dataframe_outlier = my_dataframe[my_dataframe["Cluster"]<0]
-    my_axes_a = sns.scatterplot(data=dataframe_outlier, x='PCA0', y='PCA1')
+    #show the outliers
+    fig_a = sns.scatterplot(data=dataframe_outlier, x='PCA0', y='PCA1')
 
+    #compute the index of outliers
+    my_dataframe["label"]=""
+    my_dataframe.loc[my_dataframe.Cluster==-1,"label"] = [f"{index}" for index in my_dataframe[my_dataframe.Cluster < 0].index  ]
     #label the outliers
     outliers = my_dataframe[my_dataframe.Cluster < 0]
     for label, x, y in zip(outliers.label, outliers.PCA0, outliers.PCA1):
         plt.annotate( label, (x,y))
 
+    #----------------------------------------------------
+    # Take one of the cluster found, and apply a new analysis
+    #----------------------------------------------------
+    #   the PCA will morth the set
+
+    #extract subset into a dataframe
+    subset_dataframe = my_dataframe.loc[ (my_dataframe.Cluster==0) ].iloc[:,0:2]
+    #extract matrix
+    subset_data_matrix = subset_dataframe.values.astype(float)
+    #logging.info(f"subset: { subset_data_matrix }")
+
+    #process matrix and add found clusters back into the subset dataframe
+    subset_pca = compute_pca( subset_data_matrix )
+    my_cluster_tool = make_pipeline( DBSCAN(eps=0.07) )
+    subset_clusters = my_cluster_tool.fit_predict( subset_pca )
+
+    subset_dataframe["Cluster"] = subset_clusters
+    #logging.info(f"subset: {subset_dataframe}")
+
+    #----------------------------------------------------
+    # Show subset and outliers
+    #----------------------------------------------------
+
+    fig_b = plt.figure("subset 0", figsize=(10,6))
+    #extract cluster 0
+    fig_b = sns.scatterplot(data=subset_dataframe, x='PCA0', y='PCA1', hue='Cluster',marker="+")
+
+    #construct a dataframe with the outliers
+    dataframe_subset_outlier = subset_dataframe[subset_dataframe["Cluster"]<0]
+    #show the outliers
+    fig_b = sns.scatterplot(data=dataframe_subset_outlier, x='PCA0', y='PCA1')
+    #
     plt.show()
+
+
+
+
     return
 
 
