@@ -186,8 +186,8 @@ def main():
 
     
 
-    X_mat = X.to_numpy
-    print(f"MAT {X_mat}")
+    X_mat = X.to_numpy()
+    print(f"MAT {X_mat} shape {X_mat.shape}")
 
     my_kfold = KFold(n_splits=5)
     for i_train, i_test in my_kfold.split(X_mat):
