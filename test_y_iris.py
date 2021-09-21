@@ -97,19 +97,76 @@ def exe_classifier( X_train, X_test, y_train, y_test ):
     return y_predict_train, y_predict_test
 
 #----------------------------------------------------
-# 
+#   With random forest
 #----------------------------------------------------
 
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import RandomForestClassifier
 ##
-def classifier_forest():
+def exe_classifier_forest( X_train, X_test, y_train, y_test ):
 
-    my_pipeline = make_pipeline()
+    my_pipeline = make_pipeline( StandardScaler(), RandomForestClassifier(n_estimators=20) )
+    my_pipeline.fit( X_train, y_train )
+    y_predict_train = my_pipeline.predict( X_train )
 
+    y_predict_test = my_pipeline.predict( X_test )
 
-    return
+    return y_predict_train, y_predict_test
 
+#----------------------------------------------------
+#   With random forest and grid search
+#----------------------------------------------------
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+##
+def exe_classifier_forest_search( X_train, X_test, y_train, y_test ):
+    #dictionary with the parameters to explore
+    PARAMS = { "n_estimators" : [20, 40] }
+    #build a pipeline. uses best model.score equivalent to accuracy
+    my_pipeline = make_pipeline( StandardScaler(), GridSearchCV( RandomForestClassifier(), PARAMS) )
+    my_pipeline.fit( X_train, y_train )
+    y_predict_train = my_pipeline.predict( X_train )
+
+    y_predict_test = my_pipeline.predict( X_test )
+
+    return y_predict_train, y_predict_test
+
+#----------------------------------------------------
+#   Assembly the data into good and bad sets
+#----------------------------------------------------
+
+## Take all data, and assemble them into a dataframe for good, and a dataframe for bad
+def split_good_bad( X_train, y_train, y_pred_train, X_test, y_test, y_pred_test ):
+
+    #construct training DataFrame
+    train_dataframe = DataFrame( X_train, columns=X_train.columns )
+    train_dataframe["Truth"] = y_train
+    train_dataframe["Prediction"] = y_pred_train
+    train_dataframe["Model"] = "Training"
+    #logging.info( train_dataframe )
+
+    #construct validation DataFrame
+    test_dataframe = DataFrame( X_test, columns=X_test.columns )
+    test_dataframe["Truth"] = y_test
+    test_dataframe["Prediction"] = y_pred_test
+    test_dataframe["Model"] = "Validation"
+    #logging.info(test_dataframe)
+
+    #append the two dataframes to get a full dataframe
+    full_dataframe = train_dataframe.append(test_dataframe)
+    #logging.info(full_dataframe)
+
+    result_good = full_dataframe[full_dataframe.Truth == full_dataframe.Prediction]
+    logging.info(result_good)
+
+    result_bad = full_dataframe[full_dataframe.Truth != full_dataframe.Prediction]
+    logging.info(result_bad)
+
+    return result_good, result_bad
 
 #----------------------------------------------------
 # show confusion matrix as heatmap
@@ -118,17 +175,50 @@ def classifier_forest():
 from sklearn.metrics import confusion_matrix
 ##
 def show_confusion( y_train, y_pred_train, y_test, y_pred_test ):
-    my_confusion_matrix_train = confusion_matrix(y_train, y_pred_train)
-    my_fig_train = plt.figure("TRAIN", figsize=(10,6))
-    my_fig_train = sns.heatmap(my_confusion_matrix_train, annot=True, fmt="d")
-    my_fig_train.set_xlabel("Prediction")
-    my_fig_train.set_ylabel("Ground Truth")
 
+    #compute confusion matrix
+    my_confusion_matrix_train = confusion_matrix(y_train, y_pred_train)
     my_confusion_matrix_test = confusion_matrix(y_test, y_pred_test)
-    my_fig_test = plt.figure("VALIDATION", figsize=(10,6))
-    my_fig_test = sns.heatmap(my_confusion_matrix_test, annot=True, fmt="d")
-    my_fig_train.set_xlabel("Prediction")
-    my_fig_train.set_ylabel("Ground Truth")
+
+    my_fig = plt.figure("Confusion Matrix", figsize=(16,6))
+    ax_train = my_fig.add_subplot(121)
+    ax_train.title.set_text('Train')
+    
+    #my_fig_train = plt.figure("TRAIN", figsize=(10,6))
+    
+    ax_train = sns.heatmap(my_confusion_matrix_train, annot=True, fmt="d")
+    ax_train.set_xlabel("Prediction")
+    ax_train.set_ylabel("Ground Truth")
+
+    ax_validation = my_fig.add_subplot(122)
+    ax_validation.title.set_text('Validation')
+    #my_fig_test = plt.figure("VALIDATION", figsize=(10,6))
+    ax_validation = sns.heatmap(my_confusion_matrix_test, annot=True, fmt="d")
+    ax_validation.set_xlabel("Prediction")
+    ax_validation.set_ylabel("Ground Truth")
+
+#----------------------------------------------------
+# show scatterplot
+#----------------------------------------------------
+
+def show( i_df_source_good : DataFrame(), i_df_source_bad : DataFrame() ):
+
+    my_fig = plt.figure("SCATTERPLOT", figsize=(16,6))
+
+    ax_01 = my_fig.add_subplot(121)
+    #my_fig = plt.subplot(1, 2, 1)
+    #my_fig.suptitle('Scatterplot 01')
+    ax_01 = sns.scatterplot(data=i_df_source_good, x=i_df_source_good.columns[0], y=i_df_source_good.columns[1], hue="Truth",marker="+")
+    ax_01 = sns.scatterplot(data=i_df_source_bad, x=i_df_source_bad.columns[0], y=i_df_source_bad.columns[1], hue="Truth",marker="o")
+
+    ax_23 = my_fig.add_subplot(122)
+    my_fig = plt.subplot(1, 2, 2)
+    #my_fig.suptitle('Scatterplot 23')
+    ax_23 = sns.scatterplot(data=i_df_source_good, x=i_df_source_good.columns[2], y=i_df_source_good.columns[3], hue="Truth",marker="+")
+    ax_23 = sns.scatterplot(data=i_df_source_bad, x=i_df_source_bad.columns[2], y=i_df_source_bad.columns[3], hue="Truth",marker="o")
+
+    return
+
 
 #----------------------------------------------------
 # MAIN
@@ -146,9 +236,19 @@ def main():
     #separate training and validation
     X_train, X_test, y_train, y_test = extract_matrix(my_dataframe)
 
-    y_pred_train, y_pred_test = exe_classifier( X_train, X_test, y_train, y_test )
+    #y_pred_train, y_pred_test = exe_classifier( X_train, X_test, y_train, y_test )
+    y_pred_train, y_pred_test = exe_classifier_forest( X_train, X_test, y_train, y_test )
+    y_pred_train, y_pred_test = exe_classifier_forest_search( X_train, X_test, y_train, y_test )
 
+    #find good and bad predictions
+    dataframe_good, dataframe_bad = split_good_bad( X_train, y_train, y_pred_train, X_test, y_test, y_pred_test )
+
+    #show confusion matricies for training and validation
     show_confusion( y_train, y_pred_train, y_test, y_pred_test )
+
+    #show scatterplot
+    show( dataframe_good, dataframe_bad )
+
     plt.show()
 
     return
